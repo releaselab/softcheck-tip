@@ -1,0 +1,4 @@
+(executable
+ (name main)
+ (public_name softcheck-tip)
+ (libraries core softcheck cmdliner softcheck_tip))

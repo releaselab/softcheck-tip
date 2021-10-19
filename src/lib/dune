@@ -1,0 +1,3 @@
+(library
+ (name softcheck_tip)
+ (libraries analysis ast parsing scil_tip))
