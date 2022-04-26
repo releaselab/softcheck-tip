@@ -1,4 +1,4 @@
 (executable
  (name main)
  (public_name softcheck-tip)
- (libraries core softcheck cmdliner softcheck_tip))
+ (libraries core core_unix.sys_unix softcheck cmdliner softcheck_tip))

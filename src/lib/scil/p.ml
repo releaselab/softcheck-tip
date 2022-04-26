@@ -11,21 +11,16 @@ let stmt_to_node next_label =
       | Sassign (lv, rv) -> Scil_assign (lv, rv)
       | Soutput e ->
           let f = Eident "output" in
-          Scil_call (f, [ e ])
-      | Sif (e, b) -> Scil_if (e, aux b)
+          Scil_fun_call (f, [ e ])
+      | Sif (e, b) -> Scil_if_else (e, aux b, aux (Sblock []))
       | Sifelse (e, ib, eb) -> Scil_if_else (e, aux ib, aux eb)
       | Swhile (e, b) -> Scil_while (e, aux b)
-      | Sblock (h :: t) ->
+      | Sblock b ->
+          let b = List.rev b in
           let s =
-            List.fold_left
-              (fun acc s ->
-                let stmt_label = -1 in
-                let stmt_s = Scil_seq (acc, aux s) in
-                { stmt_s; stmt_label })
-              (aux h) t
+            List.fold_left (fun acc s -> Seq_cons (aux s, acc)) Seq_skip b
           in
-          s.stmt_s
-      | Sblock [] -> assert false
+          Scil_seq s
     in
     { stmt_s; stmt_label }
   in
@@ -37,21 +32,13 @@ let funcs next_label =
   let open Scil_impl.Stmt in
   let process_decls = function
     | [] -> assert false
-    | h :: t ->
-        let init =
-          let stmt_s = Scil_var_decl h in
-          { stmt_label = next_label (); stmt_s }
-        in
+    | l ->
         List.fold_left
           (fun acc d ->
-            let stmt_label = -1 in
-            let stmt_s =
-              let stmt_label = next_label () in
-              let stmt_s = Scil_var_decl d in
-              Scil_seq (acc, { stmt_label; stmt_s })
-            in
-            { stmt_s; stmt_label })
-          init t
+            let stmt_label = next_label () in
+            let stmt_s = Scil_var_decl d in
+            Seq_cons ({ stmt_label; stmt_s }, acc))
+          Seq_skip l
   in
   List.map (fun f ->
       let decls = process_decls f.Ast.func_vars in
@@ -59,7 +46,8 @@ let funcs next_label =
         f.Ast.func_vars,
         {
           stmt_label = -1;
-          stmt_s = Scil_seq (decls, stmt_to_node next_label f.Ast.func_body);
+          stmt_s =
+            Scil_seq (Seq_cons (stmt_to_node next_label f.Ast.func_body, decls));
         } ))
 
 let convert_program_to_sl : t -> Scil_impl.program =

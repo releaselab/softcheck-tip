@@ -4,6 +4,7 @@ include
   Softcheck_analysis.Very_busy_expressions.Make (Ast.Expr) (Cfg_node) (Cfg)
     (struct
       let aexp = Ast.aexp
-
-      let contains_ident = Ast.contains_ident
+      let free_variables = Ast.free_variables
+      let uses_var = Ast.uses_var
+      let uses_lv_expr = Ast.uses_lv_expr
     end)

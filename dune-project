@@ -24,8 +24,13 @@
   (dune :build)
   softcheck
   softcheck-analysis
+  (core
+   (>= v0.15.0))
+  (core_unix
+   (>= v0.15.0))
   menhir
   fmt
-  cmdliner))
+  (cmdliner
+   (>= 1.1.1))))
 
 (using menhir 2.1)

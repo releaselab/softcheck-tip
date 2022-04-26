@@ -10,6 +10,8 @@ depends: [
   "dune" {>= "2.8" & build}
   "softcheck"
   "softcheck-analysis"
+  "core" {>= "v0.15.0"}
+  "core_unix" {>= "v0.15.0"}
   "menhir"
   "fmt"
   "cmdliner"

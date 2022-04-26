@@ -48,12 +48,24 @@ let ident_of_expr = function
   | Expr.Eident x -> x
   | _ -> raise (Invalid_argument "not and ident")
 
-let rec contains_ident x =
-  let open Expr in
-  function
-  | Ebinop (_, e1, e2) -> contains_ident x e1 || contains_ident x e2
-  | Ecallf (_, vars) | Ecallfptr (_, vars) ->
-      List.exists ~f:(contains_ident x) vars
-  | Eident _ as i -> i = x
-  | Eunop (_, e) -> contains_ident x e
-  | Ecst _ | Enull | Einput | Emalloc -> false
+let uses_lv_expr x =
+  let rec uses_lv_expr =
+    let open Expr in
+    function
+    | Ebinop (_, e1, e2) -> uses_lv_expr e1 || uses_lv_expr e2
+    | Ecallf (_, vars) | Ecallfptr (_, vars) -> List.exists ~f:uses_lv_expr vars
+    | Eident _ as i -> i = x
+    | Eunop (_, e) -> uses_lv_expr e
+    | Ecst _ | Enull | Einput | Emalloc -> false
+  in
+  uses_lv_expr
+
+let uses_var x =
+  let rec uses_var = function
+    | Expr.Ebinop (_, e1, e2) -> uses_var e1 || uses_var e2
+    | Ecallf (_, vars) | Ecallfptr (_, vars) -> List.exists ~f:uses_var vars
+    | Eident v -> String.(v = x)
+    | Eunop (_, e) -> uses_var e
+    | Ecst _ | Enull | Einput | Emalloc -> false
+  in
+  uses_var

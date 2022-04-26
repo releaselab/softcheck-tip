@@ -152,7 +152,8 @@ let run cfg _ livevars vbusy reaching available sign taint filename =
 
 let command =
   let doc = "run monotone static analyses" in
-  ( Term.(
+  let term =
+    Term.(
       const run
       $ Arg.(
           value & flag
@@ -179,7 +180,8 @@ let command =
       $ Arg.(
           required
           & pos ~rev:true 0 (some non_dir_file) None
-          & info [] ~docv:"FILE")),
-    Term.info "mframework" ~doc ~exits:Term.default_exits )
+          & info [] ~docv:"FILE"))
+  in
+  Cmd.v (Cmd.info "mframework" ~doc) term
 
-let () = Term.(exit @@ eval command)
+let () = Stdlib.exit (Cmd.eval command)
